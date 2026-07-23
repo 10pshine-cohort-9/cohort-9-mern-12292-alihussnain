@@ -2,7 +2,10 @@ const errorHandler = (err, req, res, next) => {
   let error = { ...err };
   error.message = err.message;
 
-  console.error(err);
+ console.error({
+  message: err.message,
+  stack: err.stack,
+});
 
   if (err.name === 'CastError') {
     const message = `Resource not found with id of ${err.value}`;
@@ -19,10 +22,14 @@ const errorHandler = (err, req, res, next) => {
     error = { message, statusCode: 400 };
   }
 
-  res.status(error.statusCode || 500).json({
-    success: false,
-    message: error.message || 'Server Error',
-  });
+ const statusCode = error.statusCode || 500;
+
+res.status(statusCode).json({
+  success: false,
+  message: statusCode >= 500
+    ? "Internal Server Error"
+    : error.message,
+});
 };
 
 module.exports = errorHandler;
